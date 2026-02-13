@@ -1,5 +1,4 @@
-# scPEFT
-This is the official repository for scPEFT: Parameter-Efficient Fine-Tuning Enhances Adaptation of Single Cell Large Language Model for Cell Type Identification
+
 
 ## A Quick Overview
 ![overview](IMG/overview.jpg)
@@ -7,18 +6,14 @@ This is the official repository for scPEFT: Parameter-Efficient Fine-Tuning Enha
 ## Requirements
 Download model checkpoint: [scGPT_human](https://drive.google.com/drive/folders/1oWh_-ZRdhtoGQ2Fw24HP41FgLoomVo-y) and put it at ./scGPT_human
 
-1. Clone the repository:
-    ```shell
-    git clone https://github.com/laolintou/scPEFT.git
-    ```
 
-2. Navigate to the project directory and create a conda environment:
+1. Navigate to the project directory and create a conda environment:
     ```shell
     cd scPEFT
-    conda env create -f environment.yaml
+    conda env create -f environment2.yaml
     ```
 
-3. Activate the conda environment:
+2. Activate the conda environment:
     ```shell
     conda activate scGPT
     ```
@@ -26,13 +21,7 @@ Download model checkpoint: [scGPT_human](https://drive.google.com/drive/folders/
 ## Data preparation
 All data used in this study are publicly available.
 
-|                        Dataset                           |                                                       Link                                                                                   |
-|----------------------------------------------------------|-----------------------------------------------------------------------------------------------|
-|                          M.S.                            | [M.S.](https://github.com/bowang-lab/scGPT/tree/main/data/)                                   |
-|                       Zheng68k                           | [Zheng68k](https://support.10xgenomics.com/single-cell-gene-expression/datasets(SRP073767))  |
-|                         NSCLC                            | [NSCLC](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE179994)                           |
-|                       COVID-19                           | [COVID-19](https://figshare.com/articles/dataset/seu_obj_h5ad/16922467/1)                      |
-
+brain_cellxgene: https://drive.google.com/drive/folders/1JwKoWlJa85ru0d7TS-VCX8i8MSrt-4Xy 
 
 
 ## Get Started
@@ -40,37 +29,37 @@ Firstly，enter folder tutorials  ```cd scPEFT-main/tutorials```
 
 ### native 
 ```
-python Tutorial_Reference_Mapping.py --data_name "ms"
+python Tutorial_Reference_Mapping.py --data_name "brain_cellxgene"
 ```
 ### full finetune
 #### train & test
 ```
-python Tutorial_Annotation_Finetune.py --data_name "ms" --finetune_type "Full_finetune" --use_prompt False
+python Tutorial_Annotation_Finetune.py --data_name "brain_cellxgene" --finetune_type "Full_finetune" --use_prompt False
 ```
 ### finetune classifier
 #### train & test
 ```
-python Tutorial_Annotation_Finetune.py --data_name "ms" --finetune_type "Cls_finetune" --use_prompt False
+python Tutorial_Annotation_Finetune.py --data_name "brain_cellxgene" --finetune_type "Cls_finetune" --use_prompt False
 ```
 ### Gene token prompt
 #### train & test
 ```
-python Tutorial_Annotation_Prompt.py --data_name "ms" --prompt_type "Gene_token_prompt" --use_prompt True
+python Tutorial_Annotation_Prompt.py --data_name "brain_cellxgene" --prompt_type "Gene_token_prompt" --use_prompt True  --subset_train 500 --subset_val 100 --subset_test 100 
 ```
 ### Gene encoder prompt
 #### train & test
 ```
-python Tutorial_Annotation_Prompt.py --data_name "ms" --prompt_type "Gene_encoder_prompt" --use_prompt True
+python Tutorial_Annotation_Prompt.py --data_name "brain_cellxgene" --prompt_type "Gene_encoder_prompt" --use_prompt True  --subset_train 500 --subset_val 100 --subset_test 100 
 ```
 ### prefix prompt
 #### train & test
 ```
-python Tutorial_Annotation_Prompt.py --data_name "ms" --prompt_type "prefix_prompt" --use_prompt True
+python Tutorial_Annotation_Prompt.py --data_name "brain_cellxgene" --prompt_type "prefix_prompt" --use_prompt True
 ```
 ### LoRA prompt
 #### train & test
 ```
-python Tutorial_Annotation_Prompt.py --data_name "ms" --prompt_type "LoRA" --use_prompt True
+python Tutorial_Annotation_Prompt.py --data_name "brain_cellxgene" --prompt_type "LoRA" --use_prompt True
 ```
 ## Command Line Arguments
 data_name ：dataset name
@@ -102,20 +91,4 @@ Weighted Recall: weighted Recall based on number of each cell type
 Weighted F1: weighted F1 score based on number of each cell type
 
 
-## Built With
 
-[pytorch](https://pytorch.org/)
-
-[scGPT](https://github.com/bowang-lab/scGPT)
-## Citation
-```
-@article {He2024.01.27.577455,
-	author = {Fei He and Ruixin Fei and Mingyue Gao and Li Su and Xinyu Zhang and Dong Xu},
-	title = {Parameter-Efficient Fine-Tuning Enhances Adaptation of Single Cell Large Language Model for Cell Type Identification},
-	year = {2024},
-	doi = {10.1101/2024.01.27.577455},
-	publisher = {Cold Spring Harbor Laboratory},
-	URL = {https://www.biorxiv.org/content/early/2024/01/30/2024.01.27.577455},
-	journal = {bioRxiv}
-}
-```
