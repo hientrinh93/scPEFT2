@@ -1,0 +1,14 @@
+scanpy
+scvi-tools
+anndata
+pandas
+numpy
+scikit-learn
+scipy
+matplotlib
+seaborn
+wandb
+torch
+torchtext
+loralib
+transformers

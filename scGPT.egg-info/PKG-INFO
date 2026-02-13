@@ -1,0 +1,22 @@
+Metadata-Version: 2.4
+Name: scGPT
+Version: 0.1.0
+Summary: scGPT: Single Cell Generative Pre-trained Transformer
+Requires-Python: >=3.9
+Requires-Dist: scanpy
+Requires-Dist: scvi-tools
+Requires-Dist: anndata
+Requires-Dist: pandas
+Requires-Dist: numpy
+Requires-Dist: scikit-learn
+Requires-Dist: scipy
+Requires-Dist: matplotlib
+Requires-Dist: seaborn
+Requires-Dist: wandb
+Requires-Dist: torch
+Requires-Dist: torchtext
+Requires-Dist: loralib
+Requires-Dist: transformers
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
