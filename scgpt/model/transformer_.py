@@ -739,6 +739,20 @@ class TransformerEncoderLayer(Module):
         x = self.linear2(self.dropout(self.activation(self.linear1(x))))
         return self.dropout2(x)
 
+    def forward_deep_prompt(self, src):
+        deep_prompt_emb = self.prompt_dropout(self.prompt_proj(self.prompt_embeddings))
+        deep_prompt_emb = torch.repeat_interleave(deep_prompt_emb, repeats=src.shape[0], dim=0)
+
+        if self.block_number == self.first:
+            token = torch.cat((src[:, :1, :], deep_prompt_emb), dim=1)
+            src = torch.cat((token, src[:, 1:, :]), dim=1)
+
+        else:
+            token = torch.cat((src[:, :1, :], deep_prompt_emb), dim=1)
+            src = torch.cat((token, src[:, (1+self.num_tokens):, :]), dim=1)
+
+        return src
+
 
 class TransformerDecoderLayer(Module):
     r"""TransformerDecoderLayer is made up of self-attn, multi-head-attn and feedforward network.

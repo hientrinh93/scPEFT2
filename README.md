@@ -29,17 +29,17 @@ Firstly，enter folder tutorials  ```cd scPEFT-main/tutorials```
 
 ### native 
 ```
-python Tutorial_Reference_Mapping.py --data_name "brain_cellxgene"
+python Tutorial_Reference_Mapping.py --data_name "brain_cellxgene" --model_path "scGPT_human" --subset_train 500 --subset_val 100 --subset_test 100 
 ```
 ### full finetune
 #### train & test
 ```
-python Tutorial_Annotation_Finetune.py --data_name "brain_cellxgene" --finetune_type "Full_finetune" --use_prompt False
+python Tutorial_Annotation_Finetune.py --data_name "brain_cellxgene" --finetune_type "Full_finetune" --load_model "scGPT_human" --use_prompt False --subset_train 500 --subset_val 100 --subset_test 100 
 ```
 ### finetune classifier
 #### train & test
 ```
-python Tutorial_Annotation_Finetune.py --data_name "brain_cellxgene" --finetune_type "Cls_finetune" --use_prompt False
+python Tutorial_Annotation_Finetune.py --data_name "brain_cellxgene" --finetune_type "Cls_finetune" --load_model "scGPT_human" --use_prompt False --subset_train 500 --subset_val 100 --subset_test 100 
 ```
 ### Gene token prompt
 #### train & test

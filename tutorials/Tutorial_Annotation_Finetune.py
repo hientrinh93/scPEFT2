@@ -598,15 +598,18 @@ if __name__ == "__main__":
     ## Step1: Specify hyper-parameter setup for cell-type annotation taskListed below are some hyper-parameter recommendations for the cell-type task. Note that the CLS objective is on to facilitate cell-type classification.
     #%%
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data_name", type=str, default='ms',help='ms/zheng68k/COVID/NSCLC')
+    parser.add_argument("--data_name", type=str, default='ms',help='ms/zheng68k/COVID/NSCLC/brain_cellxgene')
     parser.add_argument("--data_path", type=str, default=str(project_root / 'data'), help='Path of data for predicting.')
+    parser.add_argument("--load_model", type=str, default=None, help="Path to the pretrained model directory (containing vocab.json, args.json, best_model.pt)")
     parser.add_argument("--finetune_type", type=str, default='Cls_finetune',help='Full_finetune/Cls_finetune')
     parser.add_argument("--space_conf", type=str, default=[1,1,1,1,1,1,0,0,0,0,0,0],help='encoder space adapter list')
     parser.add_argument("--mlp_conf", type=str, default=[1,1,1,1,1,1,0,0,0,0,0,0],help='encoder mlp adapter list')
     parser.add_argument("--epoch", type=int, default=2, help='Number of epochs.')
     parser.add_argument("--use_prompt", type=bool, default=False, help='whether use prompt or not.')
-    parser.add_argument("--load_model", type=str, default=None, help="Path to the pretrained model directory (containing vocab.json, args.json, best_model.pt)")
-    parser.add_argument("--batch_size", type=int, default=4, help='Batch size.')
+    parser.add_argument("--batch_size", type=int, default=16, help='Batch size.')
+    parser.add_argument("--subset_train", type=int, default=None, help='Subset training data to N cells (None=all, e.g. 500 for quick test)')
+    parser.add_argument("--subset_val", type=int, default=None, help='Subset validation data to N cells (None=all)')
+    parser.add_argument("--subset_test", type=int, default=None, help='Subset test data to N cells (None=all)')
     parser.add_argument("--num_workers", type=int, default=0, help='Number of workers for dataloader.')
     args = parser.parse_args()
     # Ensure load_model is absolute path, resolved from script_dir if not already absolute
@@ -624,6 +627,9 @@ if __name__ == "__main__":
         mask_ratio=0.0,
         epochs=args.epoch,
         n_bins=51,
+        subset_train=args.subset_train,
+        subset_val=args.subset_val,
+        subset_test=args.subset_test,
         MVC=False, # Masked value prediction for cell embedding
         ecs_thres=0.0, # Elastic cell similarity objective, 0.0 to 1.0, 0.0 to disable
         dab_weight=0.0,
@@ -669,7 +675,7 @@ if __name__ == "__main__":
     mask_value = "auto"  # for masked values, now it should always be auto
 
     include_zero_gene = config.include_zero_gene  # if True, include zero genes among hvgs in the training
-    max_seq_len = 3001
+    max_seq_len = 1024
     n_bins = config.n_bins
 
     # input/output representation
@@ -771,6 +777,15 @@ if __name__ == "__main__":
             print(f"Warning: Validation file 'ms_val.h5ad' not found in {data_dir}. Proceeding without validation set.")
             adata_val = None
         adata_test = sc.read(data_dir / "ms_test.h5ad")
+        
+        # Apply subsetting if specified
+        if config.subset_train is not None and config.subset_train > 0:
+            adata = adata[:config.subset_train, :]
+        if config.subset_val is not None and config.subset_val > 0 and adata_val is not None:
+            adata_val = adata_val[:config.subset_val, :]
+        if config.subset_test is not None and config.subset_test > 0:
+            adata_test = adata_test[:config.subset_test, :]
+        
         adata.obs["celltype"] = adata.obs["celltype"].astype("category")
         adata_test.obs["celltype"] = adata_test.obs["celltype"].astype("category")
 
@@ -796,6 +811,15 @@ if __name__ == "__main__":
         adata = sc.read(data_dir / "zheng68k_train.h5ad")
         adata_val = sc.read(data_dir / "zheng68k_val.h5ad")
         adata_test = sc.read(data_dir / "zheng68k_test.h5ad")
+        
+        # Apply subsetting if specified
+        if config.subset_train is not None and config.subset_train > 0:
+            adata = adata[:config.subset_train, :]
+        if config.subset_val is not None and config.subset_val > 0:
+            adata_val = adata_val[:config.subset_val, :]
+        if config.subset_test is not None and config.subset_test > 0:
+            adata_test = adata_test[:config.subset_test, :]
+        
         adata.obs["celltype"] = adata.obs["celltype"].astype("category")
         adata_test.obs["celltype"] = adata_test.obs["celltype"].astype("category")
 
@@ -814,6 +838,15 @@ if __name__ == "__main__":
         adata = sc.read(data_dir / "COVID_train.h5ad")
         adata_val = sc.read(data_dir / "COVID_val.h5ad")
         adata_test = sc.read(data_dir / "COVID_test.h5ad")
+        
+        # Apply subsetting if specified
+        if config.subset_train is not None and config.subset_train > 0:
+            adata = adata[:config.subset_train, :]
+        if config.subset_val is not None and config.subset_val > 0:
+            adata_val = adata_val[:config.subset_val, :]
+        if config.subset_test is not None and config.subset_test > 0:
+            adata_test = adata_test[:config.subset_test, :]
+        
         adata.obs["celltype"] = adata.obs["cell_type"].astype("category")
         adata_val.obs["celltype"] = adata_val.obs["cell_type"].astype("category")
         adata_test.obs["celltype"] = adata_test.obs["cell_type"].astype("category")
@@ -833,6 +866,15 @@ if __name__ == "__main__":
         adata = sc.read(data_dir / "NSCLC_train_Raw.h5ad")
         adata_val = sc.read(data_dir / "NSCLC_val_Raw.h5ad")
         adata_test = sc.read(data_dir / "NSCLC_test_Raw.h5ad")
+        
+        # Apply subsetting if specified
+        if config.subset_train is not None and config.subset_train > 0:
+            adata = adata[:config.subset_train, :]
+        if config.subset_val is not None and config.subset_val > 0:
+            adata_val = adata_val[:config.subset_val, :]
+        if config.subset_test is not None and config.subset_test > 0:
+            adata_test = adata_test[:config.subset_test, :]
+        
         adata.obs["celltype"] = adata.obs["cell_type"].astype("category")
         adata_val.obs["celltype"] = adata_val.obs["cell_type"].astype("category")
         adata_test.obs["celltype"] = adata_test.obs["cell_type"].astype("category")
@@ -844,6 +886,34 @@ if __name__ == "__main__":
         adata_val.var.set_index(adata_val.var.index, inplace=True)
         adata_test.var.set_index(adata_test.var.index, inplace=True)
         data_is_raw = True
+        filter_gene_by_counts = False
+        adata_test_raw = adata_test.copy()
+        adata = adata.concatenate((adata_test, adata_val), batch_key="str_batch")
+
+    elif dataset_name == "brain_cellxgene":
+        adata = sc.read(data_dir / "cxg_train.h5ad")
+        adata_val = sc.read(data_dir / "cxg_validation.h5ad")
+        adata_test = sc.read(data_dir / "cxg_test.h5ad")
+        
+        # SUBSET AS EARLY AS POSSIBLE
+        if config.subset_train is not None:
+            adata = adata[:config.subset_train].copy()
+        if config.subset_val is not None and adata_val is not None:
+            adata_val = adata_val[:config.subset_val].copy()
+        if config.subset_test is not None:
+            adata_test = adata_test[:config.subset_test].copy()
+        
+        adata.obs["celltype"] = adata.obs["celltype"].astype("category")
+        adata_val.obs["celltype"] = adata_val.obs["celltype"].astype("category")
+        adata_test.obs["celltype"] = adata_test.obs["celltype"].astype("category")
+
+        adata.obs["batch_id"] = adata.obs["str_batch"] = "0"
+        adata_test.obs["batch_id"] = adata_test.obs["str_batch"] = "1"
+        adata_val.obs["batch_id"] = adata_val.obs["str_batch"] = "2"
+        adata.var.set_index(adata.var.index, inplace=True)
+        adata_val.var.set_index(adata_val.var.index, inplace=True)
+        adata_test.var.set_index(adata_test.var.index, inplace=True)
+        data_is_raw = False
         filter_gene_by_counts = False
         adata_test_raw = adata_test.copy()
         adata = adata.concatenate((adata_test, adata_val), batch_key="str_batch")
@@ -906,8 +976,9 @@ if __name__ == "__main__":
         result_normed_key="X_normed",  # the key in adata.layers to store the normalized data
         log1p=data_is_raw,  # 4. whether to log1p the normalized data
         result_log1p_key="X_log1p",
-        subset_hvg=False,  # 5. whether to subset the raw data to highly variable genes
+        subset_hvg=True,  # 5. whether to subset the raw data to highly variable genes
         hvg_flavor="seurat_v3" if data_is_raw else "cell_ranger",
+        n_top_genes=3000,  # if subset_hvg is True, how many top hvgs to keep
         binning=n_bins,  # 6. whether to bin the raw data and to what number of bins
         result_binned_key="X_binned",  # the key in adata.layers to store the binned data
     )
